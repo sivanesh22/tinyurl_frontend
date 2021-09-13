@@ -2,21 +2,22 @@
 
 import React, { useEffect, useState } from 'react';
 import '../css/style.scss';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Modal } from 'react-bootstrap';
 import GlobalService from '../utils/GlobalService';
 import resturls from '../utils/Apiurls';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { restbaseurl } from '../utils/Constants';
 import { useSelector, useDispatch } from 'react-redux'
 import { updateUserInfo } from '../redux/actions';
-
+import BootstrapModal from '../uicomps/BootstrapModal'
 
 function Dashboard(props) {
     const [urlList, updateUrlList] = useState([]);
     const [loading, handleLoadingChange] = useState(true);
     const [longUrl, handleLongUrlChange] = useState('');
-
-
+    const [showModal, setShowModal] = useState(false);
+    const [emailList, handleChangeEmailList] = useState('');
+    const [tempObj, handleChangeTempObj] = useState({ tinyUrl: '', originalUrl: '' })
 
     useEffect(() => {
         fetchAllUrls()
@@ -63,6 +64,8 @@ function Dashboard(props) {
     const handleValueChange = (e) => {
         if (e.target.name === 'longUrl') {
             handleLongUrlChange(e.target.value)
+        } else if (e.target.name === 'emailList') {
+            handleChangeEmailList(e.target.value)
         }
     }
 
@@ -77,23 +80,63 @@ function Dashboard(props) {
         );
     }
 
+
+    const shareViaEmail = () => {
+        let emailDataList = emailList.replace(/\s/g, "").split(',');
+        GlobalService.generalSelect(
+            async (respdata) => {
+                hideModal();
+                alert('Shared successfully')
+            },
+            resturls.shareTinyUrlViaEmail,
+            { emailList: emailDataList, tinyUrl: tempObj.tinyUrl, originalUrl: tempObj.originalUrl },
+            'POST',
+        );
+    }
+
     const { userDetails } = props.location.state;
     const userName = useSelector(state => state.userInfo.username);
     const dispatch = useDispatch();
+
+
+    const hideModal = () => setShowModal(false);
+    const handleShow = (tinyUrl, originalUrl) => {
+        const tempObj = {};
+        tempObj.tinyUrl = tinyUrl;
+        tempObj.originalUrl = originalUrl;
+        handleChangeTempObj(tempObj)
+        setShowModal(true);
+    }
+
+
     return (
 
         loading ? null : <div className='container mt-5'>
+            {showModal ? <BootstrapModal heading='Enter Email' showModal={showModal}>
+                <Modal.Body>
+                    <p>You can provide multiple email address by comma seperated</p>
+                    <Form.Control onChange={handleValueChange} type='text' name='emailList' value={emailList}
+                        placeholder='Enter Email' />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={shareViaEmail}>
+                        Send Email
+                    </Button>
+                    <Button variant="secondary" onClick={hideModal}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </BootstrapModal> : null}
             <div className='' >
                 {userName ? <span>Welcome  {userName}</span> : <button
                     onClick={() => dispatch(updateUserInfo(userDetails))}
                 >
                     Save Info to store
                 </button>}
-                
+
                 <span className='right pointer' onClick={logoutUser}>Logout</span>
                 <h1 className='mt-5'>Create New Short URL</h1>
-                <Form.Control onChange={handleValueChange} type='text' name='longUrl' value={longUrl}
-                    placeholder='Enter Long URL' />
+
                 <Button className='mt-3' type='button' onClick={generateTinyURL}>Create Tiny Url</Button>
                 <Button className='mt-3 ml-10' onClick={fetchAllUrls}>Fetch All URLs</Button>
             </div>
@@ -105,6 +148,7 @@ function Dashboard(props) {
                         <th>Original URL</th>
                         <th>Tiny Url</th>
                         <th>Copy to clipboard</th>
+                        <th>Share via email</th>
                         <th>Remove</th>
                     </tr>
                     {urlList.length ? urlList.map(data => {
@@ -117,6 +161,7 @@ function Dashboard(props) {
                                         onCopy={() => alert('Copied')}>
                                         <button className='removebutton'>Copy to clipboard </button>
                                     </CopyToClipboard></td>
+                                <td><button className='removebutton' onClick={() => handleShow(data.tinyUrl, data.originalUrl)} >Email</button></td>
                                 <td><button className='removebutton' onClick={() => removeUrl(data.tinyUrl)} >Remove</button></td>
                             </tr>
                         )
