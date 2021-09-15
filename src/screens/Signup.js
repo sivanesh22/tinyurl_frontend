@@ -30,7 +30,12 @@ function Signup(props) {
         }
         GlobalService.generalSelect(
             async (respdata) => {
-                props.history.push('/dashboard')
+                const { errorMsg } = respdata;
+                if (errorMsg) {
+                    alert(errorMsg)
+                } else {
+                    props.history.push('/dashboard')
+                }
             },
             resturls.saveAccountandUser,
             obj,

@@ -27,8 +27,12 @@ function Dashboard(props) {
     const fetchAllUrls = () => {
         GlobalService.generalSelect(
             async (respdata) => {
-                updateUrlList(respdata.urlList)
-                handleLoadingChange(false)
+                if (respdata.errorMsg) {
+                    alert(respdata.errorMsg)
+                } else {
+                    updateUrlList(respdata.urlList)
+                    handleLoadingChange(false)
+                }
             },
             resturls.fetchAllUrl,
             {},
@@ -39,8 +43,11 @@ function Dashboard(props) {
     const removeUrl = (tinyUrl) => {
         GlobalService.generalSelect(
             async (respdata) => {
-
-                updateUrlList(respdata.urlList)
+                if (respdata.errorMsg) {
+                    alert(respdata.errorMsg)
+                } else {
+                    updateUrlList(respdata.urlList)
+                }
             },
             resturls.removeTinyUrl,
             { tinyUrl },
@@ -54,8 +61,10 @@ function Dashboard(props) {
                 if (respdata.newTinyurlCreated) {
                     handleLongUrlChange('')
                     alert('Created Successfully')
-                }else if(respdata.alreadyExists){
+                } else if (respdata.alreadyExists) {
                     alert('Tinyurl already generated')
+                } else {
+                    alert('Error in creating tinyurl')
                 }
             },
             resturls.generateTinyURL,
@@ -97,8 +106,7 @@ function Dashboard(props) {
         );
     }
 
-    const { userDetails } = props.location;
-    console.log(userDetails,'userDetails')
+    const { userDetails } = props.location.state;
     const userName = useSelector(state => state.userInfo.username);
     const dispatch = useDispatch();
 
@@ -131,7 +139,7 @@ function Dashboard(props) {
             </>
             break;
         case 'userCreationModal':
-            displayModalData = <CreateUser  handleCloseModal={hideModal} />
+            displayModalData = <CreateUser handleCloseModal={hideModal} />
             break;
         default:
             displayModalData = '';
@@ -141,11 +149,11 @@ function Dashboard(props) {
 
     return (
 
-        loading ? null : <div className='container mt-5'>
-            {displayModalData ? <BootstrapModal showModal={true}>
+        loading ? null : <div className='container'>
+            {displayModalData ? <BootstrapModal showModal={true} hideModal={hideModal}>
                 {displayModalData}
             </BootstrapModal> : null}
-            <div className='' >
+            <div>
                 {userName ? <span>Welcome  {userName}</span> : <button
                     onClick={() => dispatch(updateUserInfo(userDetails))}
                 >

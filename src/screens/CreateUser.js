@@ -27,11 +27,16 @@ function CreateUser(props) {
         let obj = {
             ...values
         }
-        console.log(obj,'obj')
         GlobalService.generalSelect(
             async (respdata) => {
-                alert('User Created Successfully')
-                props.handleCloseModal()
+                const { userCreated } = respdata;
+                if (userCreated) {
+                    alert('User Created Successfully')
+                    props.handleCloseModal()
+                } else {
+                    alert('User creation failed')
+                }
+
             },
             resturls.addUser,
             obj,

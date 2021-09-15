@@ -25,7 +25,7 @@ function Login(props) {
         }
         GlobalService.generalSelect(
             async (respdata) => {
-                const { isCredentialValid, userDetails } = respdata;
+                const { isCredentialValid, userDetails, errorMsg } = respdata;
                 if (isCredentialValid) {
                     props.history.push({
                         pathname: '/dashboard',
@@ -33,6 +33,8 @@ function Login(props) {
                             userDetails
                         }
                     });
+                } else if (errorMsg) {
+                    alert(errorMsg)
                 } else {
                     alert('Invalid Credentials')
                 }
@@ -48,8 +50,8 @@ function Login(props) {
         props.history.push('/signup')
     }
 
-    
-    
+
+
     return (
         <div className='centerDiv mt-5'>
             <div className='col-3 ' >
