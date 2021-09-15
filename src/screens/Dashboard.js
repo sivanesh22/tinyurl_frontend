@@ -10,12 +10,13 @@ import { restbaseurl } from '../utils/Constants';
 import { useSelector, useDispatch } from 'react-redux'
 import { updateUserInfo } from '../redux/actions';
 import BootstrapModal from '../uicomps/BootstrapModal'
+import CreateUser from './CreateUser';
 
 function Dashboard(props) {
     const [urlList, updateUrlList] = useState([]);
     const [loading, handleLoadingChange] = useState(true);
     const [longUrl, handleLongUrlChange] = useState('');
-    const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState('');
     const [emailList, handleChangeEmailList] = useState('');
     const [tempObj, handleChangeTempObj] = useState({ tinyUrl: '', originalUrl: '' })
 
@@ -53,6 +54,8 @@ function Dashboard(props) {
                 if (respdata.newTinyurlCreated) {
                     handleLongUrlChange('')
                     alert('Created Successfully')
+                }else if(respdata.alreadyExists){
+                    alert('Tinyurl already generated')
                 }
             },
             resturls.generateTinyURL,
@@ -94,30 +97,29 @@ function Dashboard(props) {
         );
     }
 
-    const { userDetails } = props.location.state;
+    const { userDetails } = props.location;
+    console.log(userDetails,'userDetails')
     const userName = useSelector(state => state.userInfo.username);
     const dispatch = useDispatch();
 
 
-    const hideModal = () => setShowModal(false);
+    const hideModal = () => setShowModal('');
     const handleShow = (tinyUrl, originalUrl) => {
         const tempObj = {};
         tempObj.tinyUrl = tinyUrl;
         tempObj.originalUrl = originalUrl;
         handleChangeTempObj(tempObj)
-        setShowModal(true);
+        setShowModal('emailModal');
     }
+    let displayModalData = '';
+    switch (showModal) {
 
-
-    return (
-
-        loading ? null : <div className='container mt-5'>
-            {showModal ? <BootstrapModal heading='Enter Email' showModal={showModal}>
-                <Modal.Body>
-                    <p>You can provide multiple email address by comma seperated</p>
-                    <Form.Control onChange={handleValueChange} type='text' name='emailList' value={emailList}
-                        placeholder='Enter Email' />
-                </Modal.Body>
+        case 'emailModal':
+            displayModalData = <><Modal.Body>
+                <p>You can provide multiple email address by comma seperated</p>
+                <Form.Control onChange={handleValueChange} type='text' name='emailList' value={emailList}
+                    placeholder='Enter Email' />
+            </Modal.Body>
                 <Modal.Footer>
                     <Button variant="primary" onClick={shareViaEmail}>
                         Send Email
@@ -126,6 +128,22 @@ function Dashboard(props) {
                         Close
                     </Button>
                 </Modal.Footer>
+            </>
+            break;
+        case 'userCreationModal':
+            displayModalData = <CreateUser  handleCloseModal={hideModal} />
+            break;
+        default:
+            displayModalData = '';
+
+    }
+
+
+    return (
+
+        loading ? null : <div className='container mt-5'>
+            {displayModalData ? <BootstrapModal showModal={true}>
+                {displayModalData}
             </BootstrapModal> : null}
             <div className='' >
                 {userName ? <span>Welcome  {userName}</span> : <button
@@ -135,8 +153,10 @@ function Dashboard(props) {
                 </button>}
 
                 <span className='right pointer' onClick={logoutUser}>Logout</span>
+                <Button className=' pointer ml-10' type='button' onClick={() => setShowModal('userCreationModal')}>Create User</Button>
                 <h1 className='mt-5'>Create New Short URL</h1>
-
+                <Form.Control onChange={handleValueChange} type='text' name='longUrl' value={longUrl}
+                    placeholder='Enter Long URL' />
                 <Button className='mt-3' type='button' onClick={generateTinyURL}>Create Tiny Url</Button>
                 <Button className='mt-3 ml-10' onClick={fetchAllUrls}>Fetch All URLs</Button>
             </div>

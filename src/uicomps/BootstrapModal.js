@@ -9,9 +9,9 @@ function BootstrapModal(props) {
     return (
         <>
             <Modal show={showModal} onHide={hideModal}>
-                <Modal.Header >
+                {heading ? <Modal.Header >
                     <Modal.Title>{heading}</Modal.Title>
-                </Modal.Header>
+                </Modal.Header> : null}
                 {props.children}
             </Modal>
         </>

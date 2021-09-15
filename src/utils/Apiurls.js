@@ -6,6 +6,7 @@ const resturls = {
     generateTinyURL: '/generateTinyURL',
     redirectTinyUrl: '/tinyurl',
     logout: 'logout',
-    shareTinyUrlViaEmail: '/shareTinyUrlViaEmail'
+    shareTinyUrlViaEmail: '/shareTinyUrlViaEmail',
+    addUser:'/addUser'
 }
 export default resturls;
