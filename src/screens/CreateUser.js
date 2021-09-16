@@ -44,11 +44,6 @@ function CreateUser(props) {
         );
     }
 
-
-    const handleSignin = () => {
-        props.history.push('/login')
-    }
-
     return (
         <div className='mt-5 pad-10'>
             <div className='mb-5'>
